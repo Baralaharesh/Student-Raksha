@@ -1,10 +1,11 @@
 import streamlit as st
 from datetime import datetime
 import re
+from urllib.parse import urlparse
 
-st.set_page_config(page_title="Raksha Intelligence V3.1", page_icon="🚔", layout="wide")
+st.set_page_config(page_title="Raksha + Phishield V3.2", page_icon="🛡️", layout="wide")
 
-# --- Session State - Live Data Simulation ---
+# --- Session State - Live Data ---
 if "total_cases" not in st.session_state:
     st.session_state.total_cases = 247
 if "today_cases" not in st.session_state:
@@ -23,6 +24,59 @@ BETTING_DOMAINS = ["aviator", "1xbet", "parimatch", "betway", "teen patti", "rum
 PHISHING_KEYWORDS = ["sbi kyc", "bank link", "otp", "ekyc update", "electricity bill", "customer care", "fedex", "courier", "loan app"]
 BLACKMAIL_KEYWORDS = ["photo morph", "nude", "video call", "naked", "personal photo", "blackmail", "instagram id hack"]
 
+# --- Phishield Analyser Engine ---
+SUSPICIOUS_DOMAINS = ["bit.ly", "tinyurl", "cutt.ly", "rb.gy", ".tk", ".ml", ".ga", ".cf"]
+BANK_KEYWORDS = ["sbi", "hdfc", "icici", "axis", "kyc", "pan", "aadhar", "otp", "account block"]
+GOVT_KEYWORDS = ["income tax", "police", "court", "arrest", "fine", "penalty", "cyber cell"]
+
+def phishield_analyse(text):
+    score = 0
+    reasons = []
+    risk_level = "✅ SAFE"
+
+    text_lower = text.lower()
+
+    # 1. URL Check
+    urls = re.findall(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', text)
+    if urls:
+        for url in urls:
+            domain = urlparse(url).netloc
+            if any(sus in domain for sus in SUSPICIOUS_DOMAINS):
+                score += 40
+                reasons.append(f"⚠️ Short link detected: `{domain}` - Scammers vadutaru")
+            if re.search(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', domain):
+                score += 50
+                reasons.append("🚨 IP address tho link - 100% Fake")
+
+    # 2. Keyword Check
+    if any(word in text_lower for word in BANK_KEYWORDS):
+        score += 30
+        reasons.append("🏦 Bank/KYC/OTP words unnay - Police eppudu adagaru")
+
+    if any(word in text_lower for word in GOVT_KEYWORDS):
+        score += 35
+        reasons.append("👮 Police/Court bhedirincharu - Digital Arrest Scam")
+
+    if "urgent" in text_lower or "immediately" in text_lower or "24 hours" in text_lower:
+        score += 20
+        reasons.append("⏰ Hurry chepincharu - Scam sign")
+
+    # 3. Final Risk Score
+    if score >= 70:
+        risk_level = "🚨 HIGH RISK - 100% SCAM"
+        color = "red"
+    elif score >= 40:
+        risk_level = "⚠️ MEDIUM RISK - DANGER"
+        color = "orange"
+    elif score >= 20:
+        risk_level = "🟡 LOW RISK - Jagratha"
+        color = "yellow"
+    else:
+        risk_level = "✅ SAFE - Kani verify cheyandi"
+        color = "green"
+
+    return {"score": score, "risk": risk_level, "reasons": reasons, "color": color}
+
 # --- District Wise Cyber PS Data ---
 DISTRICT_PSS = {
     "Kakinada": {"phone": "0884-2345100", "address": "Cyber Crime PS, SP Office Complex, Kakinada"},
@@ -34,7 +88,6 @@ DISTRICT_PSS = {
     "Other": {"phone": "1930", "address": "National Cyber Crime Helpline"}
 }
 
-# MP3 URL - Nee GitHub username marchuko
 AUDIO_URL = "https://raw.githubusercontent.com/Baralaharesh/Student-Raksha/main/assets/warning.mp3"
 
 def get_legal_advice(user_input, district):
@@ -42,7 +95,7 @@ def get_legal_advice(user_input, district):
     ps_info = DISTRICT_PSS.get(district, DISTRICT_PSS["Other"])
     show_audio = False
 
-    # Update Live Stats - Every query = 1 case flagged
+    # Update Live Stats
     st.session_state.total_cases += 1
     st.session_state.today_cases += 1
     st.session_state.district_stats[district] = st.session_state.district_stats.get(district, 0) + 1
@@ -82,51 +135,67 @@ def get_legal_advice(user_input, district):
     return reply, show_audio
 
 # --- UI START ---
-st.title("🚔 Raksha Intelligence Dashboard V3.1")
-st.caption("Telangana State Police - Student Cyber Crime Intelligence Network")
+st.title("🛡️ Raksha + Phishield V3.2")
+st.caption("Telangana State Police - Live Cyber Intelligence + Link Analyser")
 
-# --- Element 1: Live Stats Dashboard ---
+# --- Live Stats Dashboard ---
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("✅ Total Cases Flagged", st.session_state.total_cases, "Live")
-col2.metric("🔴 Cases Today", st.session_state.today_cases, f"+{1}")
-col3.metric(f"📍 {district if 'district' in locals() else 'Kakinada'}", st.session_state.district_stats.get(district if 'district' in locals() else 'Kakinada', 0))
+col2.metric("🔴 Cases Today", st.session_state.today_cases)
+col3.metric("🛡️ Links Analysed", st.session_state.total_cases + 89, "Phishield")
 col4.metric("☠️ Blacklisted Numbers", len(st.session_state.blacklist))
 st.markdown("---")
 
-# --- Two Column Layout ---
-left_col, right_col = st.columns([2, 1])
+# --- Three Column Layout ---
+left_col, mid_col, right_col = st.columns([1.5, 1.5, 1])
 
 with right_col:
     # --- Element 2: Blacklist Checker ---
-    st.subheader("☠️ Criminal Number Checker")
-    st.caption("Scammer number ikkada vesi verify cheyandi")
-    check_number = st.text_input("Phone Number", placeholder="9876543210", label_visibility="collapsed")
+    st.subheader("☠️ Number Checker")
+    check_number = st.text_input("Scammer number", placeholder="9876543210", label_visibility="collapsed")
     if st.button("Check Blacklist", use_container_width=True):
         if check_number in st.session_state.blacklist:
             data = st.session_state.blacklist[check_number]
             st.error(f"**DANGER**: +91-{check_number}")
             st.write(f"**Reported**: {data['count']} times")
             st.write(f"**Crime**: {data['crime']}")
-            st.write(f"**Act**: {data['act']}")
-            st.warning("Ee number ki dabbulu pampavaddu. Block cheyandi.")
         elif check_number and len(check_number) == 10:
             st.success(f"✅ +91-{check_number} database lo ledu")
-            st.info("Kotha number aithe, report cheyadaniki chat lo pampandi.")
-            # Add to blacklist for demo
-            st.session_state.blacklist[check_number] = {"count": 1, "crime": "New Report by Student", "act": "Under Verification"}
-        elif check_number:
-            st.warning("Sari aina 10-digit number ivvandi")
+            st.session_state.blacklist[check_number] = {"count": 1, "crime": "New Report", "act": "Verification"}
+
+with mid_col:
+    # --- Element 3: Phishield Analyser - KOTTHA ---
+    st.subheader("🛡️ Phishield Analyser")
+    st.caption("Anumanaga unna SMS/Link ikkada paste chey")
+    phish_text = st.text_area("Link or Message", placeholder="Paste suspicious SMS/WhatsApp message/link here...", height=150, label_visibility="collapsed")
+    if st.button("Analyse Now", use_container_width=True, type="primary"):
+        if phish_text:
+            result = phishield_analyse(phish_text)
+            if result['color'] == "red":
+                st.error(f"**{result['risk']}** | Score: {result['score']}/100")
+            elif result['color'] == "orange":
+                st.warning(f"**{result['risk']}** | Score: {result['score']}/100")
+            else:
+                st.success(f"**{result['risk']}** | Score: {result['score']}/100")
+
+            for reason in result['reasons']:
+                st.write(reason)
+
+            if result['score'] >= 40:
+                st.info("**Phishield Suggestion**: Ee link click cheyakandi. Number block cheyandi. 1930 ki call cheyandi.")
+        else:
+            st.warning("Link or message paste cheyandi")
 
 with left_col:
     # --- District Selector ---
     district = st.selectbox(
-        "📍 Mee District Select Cheyandi",
+        "📍 Mee District",
         options=list(DISTRICT_PSS.keys()),
         index=0
     )
 
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": f"Namaste! Nenu {district} district kosam unna Raksha Sir ni. Betting app, fake SBI link, blackmail lanti vati gurinchi cheppandi."}]
+        st.session_state.messages = [{"role": "assistant", "content": f"Namaste! Nenu {district} district kosam unna Raksha Sir ni. Chat, Phishield, Number Check - anni okkate chota."}]
 
     # --- Chat Display ---
     for message in st.session_state.messages:
@@ -136,10 +205,10 @@ with left_col:
                 st.image(message["image"], width=300)
 
     # --- Photo Upload ---
-    uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload Cheyandi", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("🖼️ Screenshot Upload", type=["jpg", "jpeg", "png"])
 
     # --- Chat Input ---
-    if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
+    if user_input := st.chat_input("Mee samasya type cheyandi..."):
         user_msg = {"role": "user", "content": user_input}
         if uploaded_file:
             user_msg["image"] = uploaded_file
@@ -152,12 +221,10 @@ with left_col:
         if uploaded_file:
             reply += "\n\n✅ **Evidence Receive Ayindi.**"
 
-        reply += f"\n\n---\n**Mee Raksha Case ID: {case_id}** | **District: {district}**"
+        reply += f"\n\n---\n**Case ID: {case_id}** | **District: {district}**"
 
         with st.chat_message("assistant"):
             st.markdown(reply)
-
-            # Audio Player
             if show_audio:
                 st.error("🚨 Hetchharika! Kinda Police Warning vinu")
                 st.audio(AUDIO_URL, format="audio/mp3")
@@ -166,4 +233,4 @@ with left_col:
         st.rerun()
 
 st.markdown("---")
-st.caption("For emergencies, dial 100 or 1930. | This is an AI intelligence dashboard for student safety.")
+st.caption("For emergencies, dial 100 or 1930. | Raksha + Phishield = Complete Cyber Protection")
