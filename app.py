@@ -14,99 +14,27 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- MOBILE + ANIMATION CSS - FIXED ---
+# --- SIMPLE CSS - NO ANIMATION ---
 st.markdown("""
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0E1117">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
-
-/* Mobile Fix: Prevent zoom on input */
-input, select, textarea { font-size: 16px!important; }
-
-/* Animated Gradient Background */
-.stApp {
-    background: linear-gradient(-45deg, #0E1117, #1a1f2e, #0d1b2a, #1b263b);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-}
-@keyframes gradientBG {
-    0% {background-position: 0% 50%;}
-    50% {background-position: 100% 50%;}
-    100% {background-position: 0% 50%;}
-}
-
+.stApp { background-color: #0E1117; }
 .block-container {padding: 1rem 0.5rem;}
-
-/* Mobile: Reduce padding */
-@media (max-width: 768px) {
-  .block-container {padding: 0.5rem 0.2rem;}
-    h1 {font-size: 1.8rem!important;}
-    h3 {font-size: 1rem!important;}
-}
-
-/* Glowing Title */
-h1 {
-    color: #00D4FF; 
-    text-align: center; 
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    text-shadow: 0 0 10px #00D4FF, 0 0 20px #00D4FF, 0 0 30px #00D4FF;
-    margin-bottom: 0;
-    animation: pulseGlow 2s ease-in-out infinite alternate;
-}
-@keyframes pulseGlow {
-    from {text-shadow: 0 0 10px #00D4FF, 0 0 20px #00D4FF;}
-    to {text-shadow: 0 0 20px #00D4FF, 0 0 40px #00D4FF;}
-}
-
-h3 {
-    color: #FAFAFA; 
-    text-align: center; 
-    margin-top: 0;
-    font-family: 'Orbitron', sans-serif;
-}
-
+h1 {color: #00D4FF; text-align: center; font-weight: 900; margin-bottom: 0;}
+h3 {color: #FAFAFA; text-align: center; margin-top: 0;}
 .stButton>button {
-    background: linear-gradient(90deg, #00D4FF 0%, #00FF88 100%);
-    color: #0E1117; 
-    border-radius: 10px; 
+    background-color: #00D4FF;
+    color: #0E1117;
+    border-radius: 8px;
     border: none;
-    padding: 0.5rem 1rem; 
+    padding: 0.5rem 1rem;
     font-weight: bold;
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
     width: 100%;
 }
-.stButton>button:hover {
-    box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
-    transform: scale(1.02);
-}
-
-[data-testid="stMetricValue"] {
-    color: #00FF88; 
-    font-size: 28px;
-    font-family: 'Orbitron', sans-serif;
-    text-shadow: 0 0 10px #00FF88;
-}
-
-/* Mobile: Smaller metrics */
-@media (max-width: 768px) {
-    [data-testid="stMetricValue"] {font-size: 22px;}
-}
-
+[data-testid="stMetricValue"] {color: #00FF88; font-size: 28px;}
 .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
     background-color: #00D4FF;
     color: #0E1117;
     font-weight: bold;
-    box-shadow: 0 0 15px #00D4FF;
-}
-
-.logo-glow {
-    animation: logoPulse 3s ease-in-out infinite;
-}
-@keyframes logoPulse {
-    0%, 100% {filter: drop-shadow(0 0 10px #00D4FF);}
-    50% {filter: drop-shadow(0 0 25px #00FF88);}
 }
 </style>
 """, unsafe_allow_html=True)
@@ -119,17 +47,18 @@ def send_mail_alert(subject, body):
         msg['To'] = st.secrets["email"]["receiver"]
         msg['Subject'] = f"🚨 KAVACHAM ALERT: {subject}"
         msg.attach(MIMEText(body, 'html'))
-        
+
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(st.secrets["email"]["sender"], st.secrets["email"]["password"])
         server.send_message(msg)
         server.quit()
         return True
-    except:
+    except Exception as e:
+        st.error(f"Mail Error: {e}")
         return False
 
-# --- DATA ---
+# --- DATA: 26 AP DISTRICTS ---
 if 'crime_data' not in st.session_state:
     st.session_state.crime_data = pd.DataFrame({
         "District": ["Srikakulam", "Vizianagaram", "Visakhapatnam", "Alluri Sitharama Raju", "Anakapalli", "Kakinada", "East Godavari", "Konaseema", "Eluru", "West Godavari", "NTR", "Krishna", "Vijayawada", "Palnadu", "Guntur", "Bapatla", "Prakasam", "Nellore", "Tirupati", "Chittoor", "Annamayya", "Kadapa", "Anantapur", "Sri Sathya Sai", "Kurnool", "Nandyal"],
@@ -146,12 +75,10 @@ if "messages" not in st.session_state:
 # --- HEADER ---
 col_logo, col_title = st.columns([1, 6])
 with col_logo:
-    st.markdown('<div class="logo-glow">', unsafe_allow_html=True)
     try:
         st.image("kavacham_logo.png", width=100)
     except:
         st.markdown("## 🛡️")
-    st.markdown('</div>', unsafe_allow_html=True)
 with col_title:
     st.title("CYBER KAVACHAM AP")
     st.markdown("### Andhra Pradesh Digital Shield | Live Threat Intelligence")
@@ -175,13 +102,13 @@ else:
 with col_filter2:
     st.info(f"**Area:** {selected_district} | **Threats:** {map_data['Cases'].sum()}")
 
-# --- MAP + STATS - MOBILE OPTIMIZED ---
+# --- MAP + STATS ---
 col1, col2 = st.columns([3, 1.2])
 
 with col1:
     st.subheader("🗺️ Kavacham Map")
     m = folium.Map(location=map_center, zoom_start=map_zoom, control_scale=True)
-    
+
     folium.TileLayer(tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', attr='Google', name='Hybrid').add_to(m)
     folium.TileLayer(tiles='https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', attr='Google', name='Streets').add_to(m)
     folium.TileLayer(tiles='CartoDB dark_matter', name='Dark').add_to(m)
@@ -193,7 +120,6 @@ with col1:
         folium.CircleMarker(location=[row["Lat"], row["Lon"]], radius=max(8, row["Cases"]/2), popup=folium.Popup(popup_html, max_width=200), color=color, fill=True, fill_color=color, fill_opacity=0.7, weight=2).add_to(m)
 
     folium.LayerControl(position='topright').add_to(m)
-    # Mobile: height 400px - perfect fit
     st_folium(m, width=None, height=400, key="kavacham_map")
 
 with col2:
@@ -233,10 +159,9 @@ with tab2:
             is_suspicious = any(k in url_to_check.lower() for k in suspicious)
             if is_suspicious or not url_to_check.startswith("https"):
                 st.error("🚨 **DANGER! Scam Link! DO NOT CLICK.**")
-                # Backend mail alert
                 mail_body = f"<h3>Phishield Alert</h3><p><b>Scam Link Detected:</b> {url_to_check}</p><p><b>Time:</b> {datetime.now().strftime('%d-%m-%Y %I:%M %p')}</p>"
                 if send_mail_alert("Scam Link Detected", mail_body):
-                    st.toast("Backend ki mail vellindi ✅", icon="📧")
+                    st.success("Backend ki mail vellindi ✅")
             else:
                 st.success("✅ Safe ga undochu.")
         else:
@@ -252,12 +177,10 @@ with tab3:
         new_cases = st.session_state.crime_data.loc[idx, "Cases"]
         if new_cases > 50: st.session_state.crime_data.loc[idx, "Threat"] = "Critical"
         elif new_cases > 30: st.session_state.crime_data.loc[idx, "Threat"] = "High"
-        
-        # Backend mail alert
+
         mail_body = f"""<h3>New Threat Added - Kavacham</h3><p><b>District:</b> {test_district}</p><p><b>Crime:</b> {test_crime}</p><p><b>Total Cases:</b> {new_cases}</p><p><b>Time:</b> {datetime.now().strftime('%d-%m-%Y %I:%M %p')}</p><p><b>Action:</b> Check dashboard immediately</p>"""
         if send_mail_alert(f"New Threat: {test_district}", mail_body):
-            st.success(f"Kavacham Updated! Mail sent to backend ✅")
-            st.balloons()
+            st.success(f"Kavacham Updated! Mail sent to hareeshbarla2@gmail.com ✅")
         st.rerun()
 
 # --- FOOTER ---
