@@ -58,61 +58,47 @@ def get_legal_advice(user_input):
 """
     
     else:
-        return "Mee samasya naaku artham ayyindi. Konchem vivaranga cheppagalara? Evaru ibbandi pedutunnaru? Daaniki link or photo edaina unda? Bayapadakandi, mee details gopiyam ga untai."
+        return "Mee samasya naaku artham ayyindi. Konchem vivaranga cheppagalara? Evaru ibbandi pedutunnaru? Daaniki screenshot edaina unda? Bayapadakandi, mee details gopiyam ga untai."
 
 # --- Streamlit App UI ---
 st.title("👮‍♂️ Raksha Sir V2.1")
-st.caption("State Police - Cyber Crime Wing Initiative | Now with Photo Evidence")
+st.caption("Telangana State Police - Cyber Crime Wing Initiative | Evidence Upload Enabled")
 st.markdown("---")
 
-st.warning("**Namaste.** Nenu Mee Raksha Sir ni. Mosapoyara? Screenshot or photo unte ikkada pampandi. Legal Action ki adi help avutundi.")
+st.warning("**Namaste.** Nenu Mee Raksha Sir ni. Mosapoyara? Chat screenshot or fake message photo unte ikkada upload cheyandi. Legal Action ki adi help avutundi.")
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Meeru emaina cyber samasya face chestunnara? Betting app, fake SBI link, leka blackmail lanti vati gurinchi natho cheppandi. Photo/Screenshot unte kinda upload cheyandi."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Meeru emaina cyber samasya face chestunnara? Betting app, fake SBI link, leka blackmail lanti vati gurinchi natho cheppandi. Screenshot unte kinda upload cheyandi."}]
 
 # --- Chat Display ---
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        # Show uploaded images in chat history
         if "image" in message:
             st.image(message["image"], width=300)
 
-# --- Photo Upload Options ---
-st.markdown("### 📎 Evidence Upload Cheyandi")
-col1, col2 = st.columns(2)
-with col1:
-    
-with col2:
-    uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload", type=["jpg", "jpeg", "png"], key="uploader")
+# --- Photo Upload Only ---
+uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload Cheyandi", type=["jpg", "jpeg", "png"], key="uploader")
 
-# --- Handle Image Upload ---
-uploaded_image = None
-if camera_photo is not None:
-    uploaded_image = camera_photo
-    st.success("Photo receive ayyindi. Deeni tho patu mee samasya kuda type cheyandi.")
-elif uploaded_file is not None:
-    uploaded_image = uploaded_file
-    st.success("Screenshot receive ayyindi. Deeni tho patu mee samasya kuda type cheyandi.")
+if uploaded_file is not None:
+    st.success("Screenshot receive ayyindi. Deeni tho patu mee samasya kinda type cheyandi.")
 
 # --- Chat Input ---
 if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
-    # Add user message with image if exists
     user_msg = {"role": "user", "content": user_input}
-    if uploaded_image:
-        user_msg["image"] = uploaded_image
+    if uploaded_file:
+        user_msg["image"] = uploaded_file
     
     st.session_state.messages.append(user_msg)
     with st.chat_message("user"):
         st.markdown(user_input)
-        if uploaded_image:
-            st.image(uploaded_image, width=300)
+        if uploaded_file:
+            st.image(uploaded_file, width=300)
 
     reply = get_legal_advice(user_input)
     
-    # If image uploaded, add extra line
-    if uploaded_image:
-        reply += "\n\n✅ **Evidence Receive Ayindi.** Ee photo/screenshot ni mee Case ID tho police ki pampadaniki save chesamu."
+    if uploaded_file:
+        reply += "\n\n✅ **Evidence Receive Ayindi.** Ee screenshot ni mee Case ID tho Cyber Crime Police ki pampadaniki save chesamu."
     
     case_id = f"RS{datetime.now().strftime('%d%m%H%M%S')}"
     reply += f"\n\n---\n**Mee Raksha Case ID: {case_id}** \nEe ID ni badranga unchukondi. Police ni adigithe ee ID reference ivvandi."
@@ -121,7 +107,6 @@ if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
         st.markdown(reply)
     st.session_state.messages.append({"role": "assistant", "content": reply})
     
-    # Clear uploaders after submit
     st.rerun()
 
 st.markdown("---")
