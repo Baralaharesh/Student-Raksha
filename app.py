@@ -6,25 +6,93 @@ from datetime import datetime
 
 st.set_page_config(
     page_title="Cyber Kavacham AP",
-    page_icon="kavacham_logo.png",
+    page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
 <style>
-.main {background-color: #0E1117;}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+
+/* Animated Gradient Background */
+.stApp {
+    background: linear-gradient(-45deg, #0E1117, #1a1f2e, #0d1b2a, #1b263b);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
 .block-container {padding-top: 1rem;}
-    h1 {color: #00D4FF; text-align: center; font-family: 'Arial Black';
-        text-shadow: 0 0 10px #00D4FF, 2px 2px 4px #000000; margin-bottom: 0;}
-    h3 {color: #FAFAFA; text-align: center; margin-top: 0;}
+
+/* Glowing Title */
+h1 {
+    color: #00D4FF; 
+    text-align: center; 
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    text-shadow: 0 0 10px #00D4FF, 0 0 20px #00D4FF, 0 0 30px #00D4FF, 2px 2px 4px #000000;
+    margin-bottom: 0;
+    animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from {text-shadow: 0 0 10px #00D4FF, 0 0 20px #00D4FF, 0 0 30px #00D4FF;}
+    to {text-shadow: 0 0 20px #00D4FF, 0 0 30px #00D4FF, 0 0 40px #00D4FF, 0 0 50px #00D4FF;}
+}
+
+h3 {
+    color: #FAFAFA; 
+    text-align: center; 
+    margin-top: 0;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* Glowing Buttons */
 .stButton>button {
-        background: linear-gradient(90deg, #00D4FF 0%, #0099CC 100%);
-        color: white; border-radius: 10px; border: none;
-        padding: 0.5rem 1rem; font-weight: bold;
-        box-shadow: 0 4px 6px rgba(0, 212, 255, 0.3);
-    }
-    [data-testid="stMetricValue"] {color: #00D4FF; font-size: 28px;}
+    background: linear-gradient(90deg, #00D4FF 0%, #00FF88 100%);
+    color: #0E1117; 
+    border-radius: 10px; 
+    border: none;
+    padding: 0.5rem 1rem; 
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    transition: all 0.3s ease;
+}
+.stButton>button:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+    transform: scale(1.05);
+}
+
+/* Metrics with Glow */
+[data-testid="stMetricValue"] {
+    color: #00FF88; 
+    font-size: 32px;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 10px #00FF88;
+}
+
+/* Tabs Glow */
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+    background-color: #00D4FF;
+    color: #0E1117;
+    font-weight: bold;
+    box-shadow: 0 0 15px #00D4FF;
+}
+
+/* Logo Pulse Animation */
+.logo-glow {
+    animation: logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+    0%, 100% {filter: drop-shadow(0 0 10px #00D4FF);}
+    50% {filter: drop-shadow(0 0 25px #00FF88);}
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -76,16 +144,18 @@ if 'crime_data' not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Namaste! Nenu **Kavacham AI**. Meeku cyber crime nunchi rakshana kavali ante adagandi. Ex: 'Aviator safe aa?' or 'Phishing link check chey'"}]
 
-# --- HEADER WITH LOGO - 100% SAFE ---
+# --- HEADER WITH ANIMATED LOGO ---
 col_logo, col_title = st.columns([1, 6])
 with col_logo:
+    st.markdown('<div class="logo-glow">', unsafe_allow_html=True)
     try:
         st.image("kavacham_logo.png", width=120)
     except:
-        st.markdown("## 🛡️") # Logo file lekapothe emoji
+        st.markdown("## 🛡️")
+    st.markdown('</div>', unsafe_allow_html=True)
 with col_title:
     st.title("CYBER KAVACHAM AP")
-    st.markdown("### Andhra Pradesh Digital Shield | Google Maps View + 26 Districts")
+    st.markdown("### Andhra Pradesh Digital Shield | Live Threat Intelligence")
 st.markdown("---")
 
 # --- DISTRICT FILTER ---
@@ -127,13 +197,13 @@ with col1:
     folium.TileLayer(tiles='CartoDB dark_matter', name='Dark Mode', overlay=False, control=True).add_to(m)
 
     for idx, row in map_data.iterrows():
-        color_map = {"Critical": "#FF0000", "High": "#FF6B00", "Medium": "#FFD700", "Low": "#00D4FF"}
+        color_map = {"Critical": "#FF0066", "High": "#FF6B00", "Medium": "#FFD700", "Low": "#00D4FF"}
         color = color_map.get(row["Threat"], "blue")
         
         popup_html = f"""
-        <div style="font-family: Arial; width: 220px;">
+        <div style="font-family: Arial; width: 220px; background: #0E1117; color: white; padding: 10px; border-radius: 8px;">
             <h4 style="color: #00D4FF; margin: 0;">🛡️ {row['District']}</h4>
-            <hr style="margin: 5px 0;">
+            <hr style="margin: 5px 0; border-color: #00D4FF;">
             <b>Top Threat:</b> {row['Crime']}<br>
             <b>Reports:</b> {row['Cases']} cases<br>
             <b>Risk Level:</b> <span style="color: {color}; font-weight: bold;">{row['Threat']}</span><br>
@@ -150,7 +220,7 @@ with col1:
 
     folium.LayerControl(position='topright').add_to(m)
     st_folium(m, width=None, height=550, key="kavacham_map")
-    st.caption("👆 Map lo red dot nokkite popup vastundi | Right-top lo Layers maarchuko")
+    st.caption("👆 Map lo dot nokkite popup vastundi | Right-top lo Layers maarchuko")
 
 with col2:
     st.subheader("🔥 Kavacham Stats")
