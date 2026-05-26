@@ -6,7 +6,7 @@ from datetime import datetime
 
 st.set_page_config(
     page_title="Cyber Kavacham AP",
-    page_icon="🛡️",
+    page_icon="kavacham_logo.png",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
