@@ -62,7 +62,7 @@ def get_legal_advice(user_input):
 
 # --- Streamlit App UI ---
 st.title("👮‍♂️ Raksha Sir V2.1")
-st.caption("Telangana State Police - Cyber Crime Wing Initiative | Now with Photo Evidence")
+st.caption("State Police - Cyber Crime Wing Initiative | Now with Photo Evidence")
 st.markdown("---")
 
 st.warning("**Namaste.** Nenu Mee Raksha Sir ni. Mosapoyara? Screenshot or photo unte ikkada pampandi. Legal Action ki adi help avutundi.")
@@ -78,11 +78,11 @@ for message in st.session_state.messages:
         if "image" in message:
             st.image(message["image"], width=300)
 
-# --- Photo/Camera Upload Options ---
+# --- Photo Upload Options ---
 st.markdown("### 📎 Evidence Upload Cheyandi")
 col1, col2 = st.columns(2)
 with col1:
-    camera_photo = st.camera_input("📸 Live Photo Teeyandi", key="camera")
+    camera_photo = st.camera_input(" Photo Teeyandi", key="camera")
 with col2:
     uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload", type=["jpg", "jpeg", "png"], key="uploader")
 
