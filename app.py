@@ -82,7 +82,7 @@ for message in st.session_state.messages:
 st.markdown("### 📎 Evidence Upload Cheyandi")
 col1, col2 = st.columns(2)
 with col1:
-    camera_photo = st.camera_input(" Photo Teeyandi", key="camera")
+    
 with col2:
     uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload", type=["jpg", "jpeg", "png"], key="uploader")
 
