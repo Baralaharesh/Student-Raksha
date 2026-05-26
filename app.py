@@ -2,11 +2,25 @@ import streamlit as st
 from datetime import datetime
 import re
 
-st.set_page_config(page_title="Raksha Sir V2.3", page_icon="👮‍♂️", layout="centered")
+st.set_page_config(page_title="Raksha Intelligence V3.1", page_icon="🚔", layout="wide")
 
-# --- 500+ Scam Domains Database ---
+# --- Session State - Live Data Simulation ---
+if "total_cases" not in st.session_state:
+    st.session_state.total_cases = 247
+if "today_cases" not in st.session_state:
+    st.session_state.today_cases = 18
+if "district_stats" not in st.session_state:
+    st.session_state.district_stats = {"Kakinada": 52, "Vizag City": 81, "Vijayawada": 43, "Guntur": 28, "Tirupati": 19, "Rajahmundry": 24}
+if "blacklist" not in st.session_state:
+    st.session_state.blacklist = {
+        "9876543210": {"count": 14, "crime": "Aviator Scam", "act": "66D IT Act"},
+        "9123456789": {"count": 8, "crime": "SBI KYC Scam", "act": "66C IT Act"},
+        "9988776655": {"count": 21, "crime": "Nude Video Blackmail", "act": "66E, 67A IT Act"}
+    }
+
+# --- Scam Databases ---
 BETTING_DOMAINS = ["aviator", "1xbet", "parimatch", "betway", "teen patti", "rummy", "dafabet", "rajabets", "stake", "winbuzz", "lotus365"]
-PHISHING_KEYWORDS = ["sbi kyc", "bank link", "otp", "ekyc update", "electricity bill", "customer care", "fedex", "courier", "loan app", "video call"]
+PHISHING_KEYWORDS = ["sbi kyc", "bank link", "otp", "ekyc update", "electricity bill", "customer care", "fedex", "courier", "loan app"]
 BLACKMAIL_KEYWORDS = ["photo morph", "nude", "video call", "naked", "personal photo", "blackmail", "instagram id hack"]
 
 # --- District Wise Cyber PS Data ---
@@ -20,153 +34,136 @@ DISTRICT_PSS = {
     "Other": {"phone": "1930", "address": "National Cyber Crime Helpline"}
 }
 
+# MP3 URL - Nee GitHub username marchuko
+AUDIO_URL = "https://raw.githubusercontent.com/Baralaharesh/Student-Raksha/main/assets/warning.mp3"
+
 def get_legal_advice(user_input, district):
     user_lower = user_input.lower()
     ps_info = DISTRICT_PSS.get(district, DISTRICT_PSS["Other"])
-    show_audio_button = False
+    show_audio = False
 
-    # 1. Betting Apps Detection
+    # Update Live Stats - Every query = 1 case flagged
+    st.session_state.total_cases += 1
+    st.session_state.today_cases += 1
+    st.session_state.district_stats[district] = st.session_state.district_stats.get(district, 0) + 1
+
     if any(domain in user_lower for domain in BETTING_DOMAINS):
-        show_audio_button = True # Voice Warning Flag On
+        show_audio = True
         reply = f"""
 **🚨 ILLEGAL BETTING APP DETECTED - HIGH RISK 🚨**
 
 **Mee tappu emi ledu. Bayapadakandi.** Aviator, 1xBet lanti apps `Public Gambling Act` prakaram **ILLEGAL**.
 
-**Ventane Cheyavalasina 3 Pani:**
-1. **App Delete Cheyandi**: Phone lo nunchi ventane teeseseyandi.
-2. **Dabbulu Aapeyandi**: Inka okka rupee kuda aa app lo veyakandi.
-3. **Bank Alert**: UPI PIN ichi unte, ventane bank ki call cheyandi.
-
 **Legal Protection**: Ee apps promote chese vaallu `Telangana Gaming Act` prakaram **7 Years jail** ki vellachu.
-
-**Mee Local Police Station:**
-📍 **{ps_info['address']}**
-📞 **Phone: {ps_info['phone']}** | **1930 Toll-Free**
 """
 
-    # 2. Phishing / SBI Scam Detection
     elif any(word in user_lower for word in PHISHING_KEYWORDS):
         reply = f"""
 **⚠️ BANK / KYC PHISHING SCAM ALERT ⚠️**
 
 **Gurthunchukondi**: SBI / Police / FedEx eppudu link pampi OTP adagaru. Idi `Digital Arrest` Scam.
 
-**Ventane Cheyavalasina 3 Pani:**
-1. **Link Click Cheyakandi**: Click chesi unte, net off cheyandi.
-2. **OTP Cheppakandi**: Bank employee aina sare.
-3. **1930 Ki Call Cheyandi**: Dabbulu return vache chance undi.
-
 **Legal Action**: Mosam chese vaallaki `IT Act 66C & 66D` prakaram **3 Years Jail + 1 Lakh Fine**.
-
-**Mee Local Police Station:**
-📍 **{ps_info['address']}**
-📞 **Phone: {ps_info['phone']}** | **1930 Toll-Free**
 """
 
-    # 3. Blackmail / Morphing Detection
     elif any(word in user_lower for word in BLACKMAIL_KEYWORDS):
         reply = f"""
 **🛑 CYBER BLACKMAIL - SERIOUS CRIME 🛑**
 
 **Modata Oka Maata**: **Tappu 100% aa criminal didi. Meedi kaadu.** Siggu padakandi.
 
-**Legal Shield - Chattu Mee Vaipu Undi:**
-`IT Act Section 66E`: Photo/video consent lekunda teeste **3 Years Jail**.
-`IT Act Section 67A`: Explicit content share cheste **5 Years Jail**.
-
-**Ventane Cheyavalasina 4 Steps - "STOP Protocol":**
-1. **S - STOP**: Vadi tho matladatam aapeyandi.
-2. **T - TAKE SCREENSHOTS**: Chat, number, profile anni teesukondi.
-3. **O - ORIENT POLICE**: Vadi number ikkada pampandi.
-4. **P - PROTECT PROFILE**: Social Media private pettukondi.
-
-**Mee Local Police Station - Direct Help:**
-📍 **{ps_info['address']}**
-📞 **Phone: {ps_info['phone']}** | **100 Emergency**
+**Legal Shield**: `IT Act 66E`: **3 Years Jail**. `IT Act 67A`: **5 Years Jail**.
 """
 
     else:
-        reply = f"""
-Mee samasya naaku artham ayyindi. Konchem vivaranga cheppagalara? Screenshot unte upload cheyandi.
+        reply = "Mee samasya naaku artham ayyindi. Konchem vivaranga cheppagalara? Screenshot unte upload cheyandi."
 
-**Mee District Police Help:**
-📍 **{ps_info['address']}**
-📞 **Phone: {ps_info['phone']}** | **1930**
-"""
+    reply += f"\n\n**Mee Local Police Station:**\n📍 **{ps_info['address']}**\n📞 **Phone: {ps_info['phone']}** | **1930 Toll-Free**"
+    return reply, show_audio
 
-    return reply, show_audio_button
+# --- UI START ---
+st.title("🚔 Raksha Intelligence Dashboard V3.1")
+st.caption("Telangana State Police - Student Cyber Crime Intelligence Network")
 
-# --- Streamlit App UI ---
-st.title("👮‍♂️ Raksha Sir V2.3")
-st.caption("Telangana State Police - Cyber Crime Wing | Voice Alert + Local PS Connect")
+# --- Element 1: Live Stats Dashboard ---
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("✅ Total Cases Flagged", st.session_state.total_cases, "Live")
+col2.metric("🔴 Cases Today", st.session_state.today_cases, f"+{1}")
+col3.metric(f"📍 {district if 'district' in locals() else 'Kakinada'}", st.session_state.district_stats.get(district if 'district' in locals() else 'Kakinada', 0))
+col4.metric("☠️ Blacklisted Numbers", len(st.session_state.blacklist))
 st.markdown("---")
 
-# --- District Selector ---
-district = st.selectbox(
-    "📍 Mee District Select Cheyandi - Local Police Details Kosam",
-    options=list(DISTRICT_PSS.keys()),
-    index=0
-)
+# --- Two Column Layout ---
+left_col, right_col = st.columns([2, 1])
 
-st.warning("**Namaste.** Nenu Mee Raksha Sir ni. Mosapoyara? Screenshot unte upload cheyandi. Bayapadakandi, chattu mee vaipu undi.")
+with right_col:
+    # --- Element 2: Blacklist Checker ---
+    st.subheader("☠️ Criminal Number Checker")
+    st.caption("Scammer number ikkada vesi verify cheyandi")
+    check_number = st.text_input("Phone Number", placeholder="9876543210", label_visibility="collapsed")
+    if st.button("Check Blacklist", use_container_width=True):
+        if check_number in st.session_state.blacklist:
+            data = st.session_state.blacklist[check_number]
+            st.error(f"**DANGER**: +91-{check_number}")
+            st.write(f"**Reported**: {data['count']} times")
+            st.write(f"**Crime**: {data['crime']}")
+            st.write(f"**Act**: {data['act']}")
+            st.warning("Ee number ki dabbulu pampavaddu. Block cheyandi.")
+        elif check_number and len(check_number) == 10:
+            st.success(f"✅ +91-{check_number} database lo ledu")
+            st.info("Kotha number aithe, report cheyadaniki chat lo pampandi.")
+            # Add to blacklist for demo
+            st.session_state.blacklist[check_number] = {"count": 1, "crime": "New Report by Student", "act": "Under Verification"}
+        elif check_number:
+            st.warning("Sari aina 10-digit number ivvandi")
 
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": f"Namaste! Nenu {district} district students kosam unna Raksha Sir ni. Betting app, fake SBI link, blackmail lanti vati gurinchi cheppandi. Screenshot unte upload cheyandi."}]
+with left_col:
+    # --- District Selector ---
+    district = st.selectbox(
+        "📍 Mee District Select Cheyandi",
+        options=list(DISTRICT_PSS.keys()),
+        index=0
+    )
 
-# --- Chat Display ---
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-        if "image" in message:
-            st.image(message["image"], width=300)
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": f"Namaste! Nenu {district} district kosam unna Raksha Sir ni. Betting app, fake SBI link, blackmail lanti vati gurinchi cheppandi."}]
 
-# --- Photo Upload Only ---
-uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload Cheyandi", type=["jpg", "jpeg", "png"], key="uploader")
+    # --- Chat Display ---
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            if "image" in message:
+                st.image(message["image"], width=300)
 
-if uploaded_file is not None:
-    st.success("Screenshot receive ayyindi. Deeni tho patu mee samasya kinda type cheyandi.")
+    # --- Photo Upload ---
+    uploaded_file = st.file_uploader("🖼️ Screenshot / Photo Upload Cheyandi", type=["jpg", "jpeg", "png"])
 
-# --- Chat Input ---
-if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
-    user_msg = {"role": "user", "content": user_input}
-    if uploaded_file:
-        user_msg["image"] = uploaded_file
-
-    st.session_state.messages.append(user_msg)
-    with st.chat_message("user"):
-        st.markdown(user_input)
+    # --- Chat Input ---
+    if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
+        user_msg = {"role": "user", "content": user_input}
         if uploaded_file:
-            st.image(uploaded_file, width=300)
+            user_msg["image"] = uploaded_file
 
-    reply, show_audio_button = get_legal_advice(user_input, district)
+        st.session_state.messages.append(user_msg)
 
-    if uploaded_file:
-        reply += "\n\n✅ **Evidence Receive Ayindi.** Ee screenshot ni mee Case ID tho Cyber Crime Police ki pampadaniki save chesamu."
+        reply, show_audio = get_legal_advice(user_input, district)
+        case_id = f"RS{datetime.now().strftime('%d%m%H%M%S')}"
 
-    case_id = f"RS{datetime.now().strftime('%d%m%H%M%S')}"
-    reply += f"\n\n---\n**Mee Raksha Case ID: {case_id}** | **District: {district}**\nEe ID tho {DISTRICT_PSS[district]['phone']} ki call cheyandi."
+        if uploaded_file:
+            reply += "\n\n✅ **Evidence Receive Ayindi.**"
 
-    with st.chat_message("assistant"):
-        st.markdown(reply)
+        reply += f"\n\n---\n**Mee Raksha Case ID: {case_id}** | **District: {district}**"
 
-        # Option 3: Audio Button - Betting detect aithe ne vastundi
-        if show_audio_button:
-            st.error("🚨 Hetchharika! Kinda button nokki Police Warning vinu")
-            if st.button("🔊 Police Warning Vinu", type="primary", key=f"audio_{case_id}"):
-                audio_html = """
-                <script>
-                    var msg = new SpeechSynthesisUtterance();
-                    msg.text = "Hetchharika! Idi illegal betting app. Telangana Gaming Act prakaram seven years jail padutundi. Ventane delete cheyandi.";
-                    msg.lang = 'te-IN';
-                    window.speechSynthesis.speak(msg);
-                </script>
-                """
-                st.components.v1.html(audio_html, height=0)
-                st.success("✅ Warning play ayyindi. Jagratha.")
+        with st.chat_message("assistant"):
+            st.markdown(reply)
 
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-    st.rerun()
+            # Audio Player
+            if show_audio:
+                st.error("🚨 Hetchharika! Kinda Police Warning vinu")
+                st.audio(AUDIO_URL, format="audio/mp3")
+
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+        st.rerun()
 
 st.markdown("---")
-st.caption("For emergencies, dial 100 or 1930. | Developed for Student Safety | This is an AI advisor, not a replacement for a formal police complaint.")
+st.caption("For emergencies, dial 100 or 1930. | This is an AI intelligence dashboard for student safety.")
