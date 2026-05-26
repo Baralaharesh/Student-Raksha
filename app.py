@@ -16,8 +16,8 @@ st.markdown("""
 .main {background-color: #0E1117;}
 .block-container {padding-top: 1rem;}
     h1 {color: #00D4FF; text-align: center; font-family: 'Arial Black';
-        text-shadow: 0 0 10px #00D4FF, 2px 2px 4px #000000;}
-    h3 {color: #FAFAFA; text-align: center;}
+        text-shadow: 0 0 10px #00D4FF, 2px 2px 4px #000000; margin-bottom: 0;}
+    h3 {color: #FAFAFA; text-align: center; margin-top: 0;}
 .stButton>button {
         background: linear-gradient(90deg, #00D4FF 0%, #0099CC 100%);
         color: white; border-radius: 10px; border: none;
@@ -78,9 +78,13 @@ if 'crime_data' not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Namaste! Nenu **Kavacham AI**. Meeku cyber crime nunchi rakshana kavali ante adagandi. Ex: 'Aviator safe aa?' or 'Phishing link check chey'"}]
 
-# --- HEADER ---
-st.title("🛡️ CYBER KAVACHAM AP")
-st.markdown("### Andhra Pradesh Digital Shield | Google Maps View + 26 Districts")
+# --- HEADER WITH LOGO ---
+col_logo, col_title = st.columns([1, 6])
+with col_logo:
+    st.image("kavacham_logo.png", width=120)
+with col_title:
+    st.title("CYBER KAVACHAM AP")
+    st.markdown("### Andhra Pradesh Digital Shield | Google Maps View + 26 Districts")
 st.markdown("---")
 
 # --- DISTRICT FILTER ---
@@ -107,40 +111,24 @@ col1, col2 = st.columns([3, 1.2])
 with col1:
     st.subheader("🗺️ Kavacham Google Map - Live Threats")
     
-    # GOOGLE MAPS STYLE WITH CITY LABELS
     m = folium.Map(location=map_center, zoom_start=map_zoom, control_scale=True)
     
-    # Layer 1: Google Hybrid - Satellite + Roads + City Names
     folium.TileLayer(
         tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-        attr='Google',
-        name='Google Hybrid',
-        overlay=False,
-        control=True
+        attr='Google', name='Google Hybrid', overlay=False, control=True
     ).add_to(m)
     
-    # Layer 2: Google Streets
     folium.TileLayer(
         tiles='https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-        attr='Google',
-        name='Google Streets',
-        overlay=False,
-        control=True
+        attr='Google', name='Google Streets', overlay=False, control=True
     ).add_to(m)
     
-    # Layer 3: Dark Mode
-    folium.TileLayer(
-        tiles='CartoDB dark_matter',
-        name='Dark Mode',
-        overlay=False,
-        control=True
-    ).add_to(m)
+    folium.TileLayer(tiles='CartoDB dark_matter', name='Dark Mode', overlay=False, control=True).add_to(m)
 
     for idx, row in map_data.iterrows():
         color_map = {"Critical": "#FF0000", "High": "#FF6B00", "Medium": "#FFD700", "Low": "#00D4FF"}
         color = color_map.get(row["Threat"], "blue")
         
-        # CLEAN SINGLE POPUP
         popup_html = f"""
         <div style="font-family: Arial; width: 220px;">
             <h4 style="color: #00D4FF; margin: 0;">🛡️ {row['District']}</h4>
@@ -154,14 +142,9 @@ with col1:
         """
         
         folium.CircleMarker(
-            location=[row["Lat"], row["Lon"]], 
-            radius=max(10, row["Cases"]/1.5),
+            location=[row["Lat"], row["Lon"]], radius=max(10, row["Cases"]/1.5),
             popup=folium.Popup(popup_html, max_width=250),
-            color=color, 
-            fill=True,
-            fill_color=color, 
-            fill_opacity=0.7, 
-            weight=3
+            color=color, fill=True, fill_color=color, fill_opacity=0.7, weight=3
         ).add_to(m)
 
     folium.LayerControl(position='topright').add_to(m)
