@@ -1,9 +1,8 @@
 import streamlit as st
 from datetime import datetime
 import re
-import base64
 
-st.set_page_config(page_title="Raksha Sir V2.2", page_icon="👮‍♂️", layout="centered")
+st.set_page_config(page_title="Raksha Sir V2.3", page_icon="👮‍♂️", layout="centered")
 
 # --- 500+ Scam Domains Database ---
 BETTING_DOMAINS = ["aviator", "1xbet", "parimatch", "betway", "teen patti", "rummy", "dafabet", "rajabets", "stake", "winbuzz", "lotus365"]
@@ -21,29 +20,15 @@ DISTRICT_PSS = {
     "Other": {"phone": "1930", "address": "National Cyber Crime Helpline"}
 }
 
-def play_audio_alert():
-    # Police Siren + Telugu Warning Audio - Base64
-    audio_html = """
-    <audio autoplay>
-        <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
-    </audio>
-    <script>
-        var msg = new SpeechSynthesisUtterance();
-        msg.text = "Hetchharika! Idi illegal betting app. Police case avutundi. Ventane delete cheyandi.";
-        msg.lang = 'te-IN';
-        window.speechSynthesis.speak(msg);
-    </script>
-    """
-    st.components.v1.html(audio_html, height=0)
-
 def get_legal_advice(user_input, district):
     user_lower = user_input.lower()
     ps_info = DISTRICT_PSS.get(district, DISTRICT_PSS["Other"])
+    show_audio_button = False
 
     # 1. Betting Apps Detection
     if any(domain in user_lower for domain in BETTING_DOMAINS):
-        play_audio_alert() # Voice Warning Trigger
-        return f"""
+        show_audio_button = True # Voice Warning Flag On
+        reply = f"""
 **🚨 ILLEGAL BETTING APP DETECTED - HIGH RISK 🚨**
 
 **Mee tappu emi ledu. Bayapadakandi.** Aviator, 1xBet lanti apps `Public Gambling Act` prakaram **ILLEGAL**.
@@ -58,13 +43,11 @@ def get_legal_advice(user_input, district):
 **Mee Local Police Station:**
 📍 **{ps_info['address']}**
 📞 **Phone: {ps_info['phone']}** | **1930 Toll-Free**
-
-Mee school peru chepte, ma team mee school lo free ga awareness session pedutundi.
 """
 
     # 2. Phishing / SBI Scam Detection
     elif any(word in user_lower for word in PHISHING_KEYWORDS):
-        return f"""
+        reply = f"""
 **⚠️ BANK / KYC PHISHING SCAM ALERT ⚠️**
 
 **Gurthunchukondi**: SBI / Police / FedEx eppudu link pampi OTP adagaru. Idi `Digital Arrest` Scam.
@@ -79,13 +62,11 @@ Mee school peru chepte, ma team mee school lo free ga awareness session pedutund
 **Mee Local Police Station:**
 📍 **{ps_info['address']}**
 📞 **Phone: {ps_info['phone']}** | **1930 Toll-Free**
-
-Aa fake link screenshot unte ikkada upload cheyandi.
 """
 
     # 3. Blackmail / Morphing Detection
     elif any(word in user_lower for word in BLACKMAIL_KEYWORDS):
-        return f"""
+        reply = f"""
 **🛑 CYBER BLACKMAIL - SERIOUS CRIME 🛑**
 
 **Modata Oka Maata**: **Tappu 100% aa criminal didi. Meedi kaadu.** Siggu padakandi.
@@ -103,12 +84,10 @@ Aa fake link screenshot unte ikkada upload cheyandi.
 **Mee Local Police Station - Direct Help:**
 📍 **{ps_info['address']}**
 📞 **Phone: {ps_info['phone']}** | **100 Emergency**
-
-"Yes, report cheyandi" ante, nenu ee Case ni direct ga forward chestha.
 """
 
     else:
-        return f"""
+        reply = f"""
 Mee samasya naaku artham ayyindi. Konchem vivaranga cheppagalara? Screenshot unte upload cheyandi.
 
 **Mee District Police Help:**
@@ -116,12 +95,14 @@ Mee samasya naaku artham ayyindi. Konchem vivaranga cheppagalara? Screenshot unt
 📞 **Phone: {ps_info['phone']}** | **1930**
 """
 
+    return reply, show_audio_button
+
 # --- Streamlit App UI ---
-st.title("👮‍♂️ Raksha Sir V2.2")
+st.title("👮‍♂️ Raksha Sir V2.3")
 st.caption("Telangana State Police - Cyber Crime Wing | Voice Alert + Local PS Connect")
 st.markdown("---")
 
-# --- District Selector - Option 4 ---
+# --- District Selector ---
 district = st.selectbox(
     "📍 Mee District Select Cheyandi - Local Police Details Kosam",
     options=list(DISTRICT_PSS.keys()),
@@ -158,7 +139,7 @@ if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
         if uploaded_file:
             st.image(uploaded_file, width=300)
 
-    reply = get_legal_advice(user_input, district)
+    reply, show_audio_button = get_legal_advice(user_input, district)
 
     if uploaded_file:
         reply += "\n\n✅ **Evidence Receive Ayindi.** Ee screenshot ni mee Case ID tho Cyber Crime Police ki pampadaniki save chesamu."
@@ -168,8 +149,23 @@ if user_input := st.chat_input("Mee samasya ikkada type cheyandi..."):
 
     with st.chat_message("assistant"):
         st.markdown(reply)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
 
+        # Option 3: Audio Button - Betting detect aithe ne vastundi
+        if show_audio_button:
+            st.error("🚨 Hetchharika! Kinda button nokki Police Warning vinu")
+            if st.button("🔊 Police Warning Vinu", type="primary", key=f"audio_{case_id}"):
+                audio_html = """
+                <script>
+                    var msg = new SpeechSynthesisUtterance();
+                    msg.text = "Hetchharika! Idi illegal betting app. Telangana Gaming Act prakaram seven years jail padutundi. Ventane delete cheyandi.";
+                    msg.lang = 'te-IN';
+                    window.speechSynthesis.speak(msg);
+                </script>
+                """
+                st.components.v1.html(audio_html, height=0)
+                st.success("✅ Warning play ayyindi. Jagratha.")
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
     st.rerun()
 
 st.markdown("---")
