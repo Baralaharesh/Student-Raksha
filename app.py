@@ -60,10 +60,8 @@ if 'crime_data' not in st.session_state:
             "OTP Fraud", "Nude Call", "Betting", "UPI Scam", "Loan App", "KYC Scam"
         ],
         "Cases": [
-            25, 14, 62, 18, 29,
-            47, 36, 21, 33, 19,
-            28, 41, 55, 16, 43,
-            12, 24, 28, 31, 22,
+            25, 14, 62, 18, 29, 47, 36, 21, 33, 19,
+            28, 41, 55, 16, 43, 12, 24, 28, 31, 22,
             15, 17, 22, 11, 19, 13
         ],
         "Threat": [
@@ -78,10 +76,13 @@ if 'crime_data' not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Namaste! Nenu **Kavacham AI**. Meeku cyber crime nunchi rakshana kavali ante adagandi. Ex: 'Aviator safe aa?' or 'Phishing link check chey'"}]
 
-# --- HEADER WITH LOGO ---
+# --- HEADER WITH LOGO - 100% SAFE ---
 col_logo, col_title = st.columns([1, 6])
 with col_logo:
-    st.image("kavacham_logo.png", width=120)
+    try:
+        st.image("kavacham_logo.png", width=120)
+    except:
+        st.markdown("## 🛡️") # Logo file lekapothe emoji
 with col_title:
     st.title("CYBER KAVACHAM AP")
     st.markdown("### Andhra Pradesh Digital Shield | Google Maps View + 26 Districts")
