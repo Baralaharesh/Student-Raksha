@@ -17,7 +17,7 @@ st.set_page_config(
 # --- SIMPLE CSS - NO ANIMATION ---
 st.markdown("""
 <style>
-.stApp { background-color: #0E1117; }
+.stApp { background-color: #ffff; }
 .block-container {padding: 1rem 0.5rem;}
 h1 {color: #00D4FF; text-align: center; font-weight: 900; margin-bottom: 0;}
 h3 {color: #FAFAFA; text-align: center; margin-top: 0;}
