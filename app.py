@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Mobile responsive meta tags
+# --- MOBILE + ANIMATION CSS - FIXED ---
 st.markdown("""
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0E1117">
@@ -22,9 +22,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
 
 /* Mobile Fix: Prevent zoom on input */
-input, select, textarea {
-    font-size: 16px!important;
-}
+input, select, textarea { font-size: 16px!important; }
 
 /* Animated Gradient Background */
 .stApp {
@@ -32,7 +30,6 @@ input, select, textarea {
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
 }
-
 @keyframes gradientBG {
     0% {background-position: 0% 50%;}
     50% {background-position: 100% 50%;}
@@ -43,7 +40,7 @@ input, select, textarea {
 
 /* Mobile: Reduce padding */
 @media (max-width: 768px) {
-   .block-container {padding: 0.5rem 0.2rem;}
+  .block-container {padding: 0.5rem 0.2rem;}
     h1 {font-size: 1.8rem!important;}
     h3 {font-size: 1rem!important;}
 }
@@ -58,7 +55,6 @@ h1 {
     margin-bottom: 0;
     animation: pulseGlow 2s ease-in-out infinite alternate;
 }
-
 @keyframes pulseGlow {
     from {text-shadow: 0 0 10px #00D4FF, 0 0 20px #00D4FF;}
     to {text-shadow: 0 0 20px #00D4FF, 0 0 40px #00D4FF;}
@@ -83,6 +79,7 @@ h3 {
 }
 .stButton>button:hover {
     box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+    transform: scale(1.02);
 }
 
 [data-testid="stMetricValue"] {
@@ -129,11 +126,10 @@ def send_mail_alert(subject, body):
         server.send_message(msg)
         server.quit()
         return True
-    except Exception as e:
-        st.error(f"Mail Error: {e}")
+    except:
         return False
 
-# --- DATA: 26 AP DISTRICTS ---
+# --- DATA ---
 if 'crime_data' not in st.session_state:
     st.session_state.crime_data = pd.DataFrame({
         "District": ["Srikakulam", "Vizianagaram", "Visakhapatnam", "Alluri Sitharama Raju", "Anakapalli", "Kakinada", "East Godavari", "Konaseema", "Eluru", "West Godavari", "NTR", "Krishna", "Vijayawada", "Palnadu", "Guntur", "Bapatla", "Prakasam", "Nellore", "Tirupati", "Chittoor", "Annamayya", "Kadapa", "Anantapur", "Sri Sathya Sai", "Kurnool", "Nandyal"],
@@ -179,7 +175,7 @@ else:
 with col_filter2:
     st.info(f"**Area:** {selected_district} | **Threats:** {map_data['Cases'].sum()}")
 
-# --- MAP + STATS - MOBILE RESPONSIVE ---
+# --- MAP + STATS - MOBILE OPTIMIZED ---
 col1, col2 = st.columns([3, 1.2])
 
 with col1:
@@ -193,13 +189,11 @@ with col1:
     for idx, row in map_data.iterrows():
         color_map = {"Critical": "#FF0066", "High": "#FF6B00", "Medium": "#FFD700", "Low": "#00D4FF"}
         color = color_map.get(row["Threat"], "blue")
-        
         popup_html = f"""<div style="font-family: Arial; width: 200px; background: #0E1117; color: white; padding: 8px; border-radius: 8px;"><h4 style="color: #00D4FF; margin: 0;">🛡️ {row['District']}</h4><hr style="margin: 5px 0; border-color: #00D4FF;"><b>Threat:</b> {row['Crime']}<br><b>Cases:</b> {row['Cases']}<br><b>Risk:</b> <span style="color: {color}; font-weight: bold;">{row['Threat']}</span><br><a href="tel:1930" style="color:#FF4B4B;">📞 1930</a></div>"""
-        
         folium.CircleMarker(location=[row["Lat"], row["Lon"]], radius=max(8, row["Cases"]/2), popup=folium.Popup(popup_html, max_width=200), color=color, fill=True, fill_color=color, fill_opacity=0.7, weight=2).add_to(m)
 
     folium.LayerControl(position='topright').add_to(m)
-    # Mobile: height thaggincham
+    # Mobile: height 400px - perfect fit
     st_folium(m, width=None, height=400, key="kavacham_map")
 
 with col2:
@@ -242,7 +236,7 @@ with tab2:
                 # Backend mail alert
                 mail_body = f"<h3>Phishield Alert</h3><p><b>Scam Link Detected:</b> {url_to_check}</p><p><b>Time:</b> {datetime.now().strftime('%d-%m-%Y %I:%M %p')}</p>"
                 if send_mail_alert("Scam Link Detected", mail_body):
-                    st.toast("Backend ki mail vellindi ✅")
+                    st.toast("Backend ki mail vellindi ✅", icon="📧")
             else:
                 st.success("✅ Safe ga undochu.")
         else:
